@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 
 import ButtonComponent from "@/components/ButtonComponent.vue";
@@ -9,18 +9,17 @@ import type { Entry } from "@/model";
 
 import { useEntryStore } from "@/stores/entry";
 
+const store = useEntryStore();
+
 const drawer = ref(false);
 
 const entryFormRef = ref<FormInstance>();
-
-const { saveEntry } = useEntryStore();
 
 const toggleDrawer = () => {
   drawer.value = !drawer.value;
 };
 
-const entryForm: Entry = reactive({
-  id: "",
+const entryForm: Entry = reactive<Omit<Entry, 'id'>>({
   title: "",
   content: "",
 });
@@ -37,17 +36,25 @@ const entryFormRules = reactive<FormRules<Entry>>({
 });
 
 const submitEntryForm = async (formEl: FormInstance | undefined) => {
+  console.log(entryForm);
   if (!formEl) return;
-  await formEl.validate((valid, fields) => {
-    if (valid) {
-      saveEntry(entryForm);
-      formEl.resetFields();
-      toggleDrawer();
-    } else {
-      console.log("error submit!", fields);
-    }
-  });
+  const isValid = await formEl.validate();
+  if (!isValid) {
+    console.log("Error submitting form");
+    return;
+  } 
+  
+  const saved = await store.saveEntry(entryForm);
+  
+  if (saved) {
+    toggleDrawer();
+    console.log(store.entries);
+    entryFormRef.value.resetFields();
+  }
+  
 };
+
+
 
 const resetEntryForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
@@ -66,6 +73,7 @@ const resetEntryForm = (formEl: FormInstance | undefined) => {
     size="30%"
   >
     <el-form
+     @keyup.enter="submitEntryForm(entryFormRef)"
       ref="entryFormRef"
       :rules="entryFormRules"
       :model="entryForm"
@@ -91,8 +99,8 @@ const resetEntryForm = (formEl: FormInstance | undefined) => {
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="success" @click="submitEntryForm(entryFormRef)">
-          Save
+        <el-button type="success" :loading="store.isLoading" @click="submitEntryForm(entryFormRef)">
+          {{ store.isLoading ? 'Saving ...' : 'Save' }}
         </el-button>
         <el-button type="default" @click="resetEntryForm(entryFormRef)"
           >Reset</el-button
