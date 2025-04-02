@@ -15,7 +15,7 @@
           </div>
         </template>
         <p>{{ entry.content }}</p>
-        <template #footer>{{ entry.date?.toDateString() }}</template>
+        <template #footer>{{ entry.date }}</template>
       </el-card>
     </el-col>
   </el-row>

@@ -6,7 +6,9 @@ import type { Entry } from "@/model";
 import { ElNotification } from "element-plus";
 
 export const useEntryStore = defineStore("entry", () => {
-  const entries = reactive<Entry[]>([]);
+  const entries = reactive<Entry[]>(
+    JSON.parse(localStorage.getItem("entry") || "[]")
+  );
   const isLoading = ref(false);
 
   async function saveEntry(
@@ -20,7 +22,7 @@ export const useEntryStore = defineStore("entry", () => {
       });
       const newEntryWithId: Entry = {
         id: crypto.randomUUID(),
-        date: new Date(),
+        date: new Date().toDateString(),
         ...newEntry,
       };
 
@@ -32,6 +34,8 @@ export const useEntryStore = defineStore("entry", () => {
         type: "success",
         duration: 5000,
       });
+
+      localStorage.setItem("entry", JSON.stringify(entries));
 
       return true;
     } catch (error) {

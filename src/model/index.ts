@@ -2,5 +2,5 @@ export type Entry = {
   id?: string;
   title: string;
   content: string;
-  date?: Date;
+  date?: string;
 };
