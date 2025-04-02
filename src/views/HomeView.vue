@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from "vue";
+import { ref, reactive } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import InputTextComponent from "@/components/InputComponent.vue";
+import EntryCard from "@/components/EntryCard.vue";
 
 import type { Entry } from "@/model";
 
@@ -19,7 +20,7 @@ const toggleDrawer = () => {
   drawer.value = !drawer.value;
 };
 
-const entryForm: Entry = reactive<Omit<Entry, 'id'>>({
+const entryForm: Entry = reactive<Omit<Entry, "id, date">>({
   title: "",
   content: "",
 });
@@ -42,19 +43,16 @@ const submitEntryForm = async (formEl: FormInstance | undefined) => {
   if (!isValid) {
     console.log("Error submitting form");
     return;
-  } 
-  
+  }
+
   const saved = await store.saveEntry(entryForm);
-  
+
   if (saved) {
     toggleDrawer();
     console.log(store.entries);
-    entryFormRef.value.resetFields();
+    entryFormRef.value?.resetFields();
   }
-  
 };
-
-
 
 const resetEntryForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
@@ -73,7 +71,7 @@ const resetEntryForm = (formEl: FormInstance | undefined) => {
     size="30%"
   >
     <el-form
-     @keyup.enter="submitEntryForm(entryFormRef)"
+      @keyup.enter="submitEntryForm(entryFormRef)"
       ref="entryFormRef"
       :rules="entryFormRules"
       :model="entryForm"
@@ -99,8 +97,12 @@ const resetEntryForm = (formEl: FormInstance | undefined) => {
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="success" :loading="store.isLoading" @click="submitEntryForm(entryFormRef)">
-          {{ store.isLoading ? 'Saving ...' : 'Save' }}
+        <el-button
+          type="success"
+          :loading="store.isLoading"
+          @click="submitEntryForm(entryFormRef)"
+        >
+          {{ store.isLoading ? "Saving ..." : "Save" }}
         </el-button>
         <el-button type="default" @click="resetEntryForm(entryFormRef)"
           >Reset</el-button
@@ -108,6 +110,9 @@ const resetEntryForm = (formEl: FormInstance | undefined) => {
       </el-form-item>
     </el-form>
   </el-drawer>
+  <div>
+    <EntryCard />
+  </div>
 </template>
 
 <style scoped>

@@ -9,7 +9,9 @@ export const useEntryStore = defineStore("entry", () => {
   const entries = reactive<Entry[]>([]);
   const isLoading = ref(false);
 
-  async function saveEntry(newEntry: Omit<Entry, "id">): Promise<boolean> {
+  async function saveEntry(
+    newEntry: Omit<Entry, "id, date">
+  ): Promise<boolean> {
     isLoading.value = true;
 
     try {
@@ -18,6 +20,7 @@ export const useEntryStore = defineStore("entry", () => {
       });
       const newEntryWithId: Entry = {
         id: crypto.randomUUID(),
+        date: new Date(),
         ...newEntry,
       };
 
